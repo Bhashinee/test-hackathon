@@ -5,7 +5,9 @@ import ballerina/encoding;
 
 string consuleAgentApi = "http://localhost:8500/v1";
 public function main(string... args) {
-    // Register the service in consule.
+    // Register the service in consule. Ideally this should happen in the service start up phase.
+    // Since in Ballerina there is no way of knowing the service has started succesfully, a different 
+    // client will be used to register the service.
     http:Client registerClient = new("http://localhost:8080/backend/deployInConsule");
     var registerdeResponse = registerClient->get("/");
     if (registerdeResponse is http:Response) {
@@ -28,12 +30,11 @@ public function main(string... args) {
 }
 
 public function getEndpointUrl() returns @tainted string {
-    http:Client clientEp = new (consuleAgentApi + "/v1/kv/prod");
+    http:Client clientEp = new (consuleAgentApi + "/kv/prod");
     var result = clientEp->get("");
     string url = "";
-    io:println(result);
 
-    if (result is http:Response) {
+    if (result is http:Response) {  
         var jsonPayload = result.getJsonPayload();        
         if (jsonPayload is json[]) {
             var jsonValue = jsonPayload[0].Value; 
@@ -53,11 +54,13 @@ public function getEndpointUrl() returns @tainted string {
 
 public function validateStatus(http:Response registerResponse) returns boolean {
     var registerJsonPayload = registerResponse.getJsonPayload();
+    io:println(registerJsonPayload);
     if (registerJsonPayload is json[]) {
-        var node = registerJsonPayload[0];
-        if (node is json[]) {
-            var checks = node[0];
-            var output = checks.Output;
+        var node = registerJsonPayload[0];  
+        var checks = node.Checks;
+        if (checks is json[]) {
+            var output = checks[0].Output;
+            io:println(output);
             if (output is json) {
                 return true;
             }
