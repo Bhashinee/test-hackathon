@@ -62,6 +62,7 @@ public function validateStatus(http:Response registerResponse) returns boolean {
             var output = checks[0].Output;
             io:println(output);
             if (output is json) {
+                io:println("--------------------------returning true---------------");
                 return true;
             }
         }
