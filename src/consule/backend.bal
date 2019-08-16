@@ -19,7 +19,7 @@ service backend on new http:Listener(port) {
         path: "/deployInConsule"
     }
     resource function deployInConsule(http:Caller caller, http:Request request) {
-        http:Client consuleClient = new (consuleApi + "v1/agent/service/register");
+        http:Client consuleClient = new (consuleApi + "/agent/service/register");
         json registerPayload = {"ID": "bal12", "Name": "ballerina2", "tags": ["balService"], "port": port };
         var response = consuleClient->put("", registerPayload);
         if (response is http:Response) {
