@@ -3,13 +3,14 @@ import ballerina/io;
 import ballerina/crypto;
 import ballerina/encoding;
 
+string consuleAgentApi = "http://localhost:8500/v1";
 public function main(string... args) {
     // Register the service in consule.
     http:Client registerClient = new("http://localhost:8080/backend/deployInConsule");
     var registerdeResponse = registerClient->get("/");
     if (registerdeResponse is http:Response) {
         if (registerdeResponse.statusCode == 200) {
-            http:Client healthClient = new("http://localhost:8500/v1/health/service/ballerina");
+            http:Client healthClient = new(consuleAgentApi + "/health/service/ballerina");
             var healthResp = healthClient->get("");
             if (healthResp is http:Response) {
                 // Do a health check before calling the endpoint.
@@ -27,7 +28,7 @@ public function main(string... args) {
 }
 
 public function getEndpointUrl() returns @tainted string {
-    http:Client clientEp = new ("http://localhost:8500/v1/kv/prod");
+    http:Client clientEp = new (consuleAgentApi + "/v1/kv/prod");
     var result = clientEp->get("");
     string url = "";
     io:println(result);
